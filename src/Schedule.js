@@ -25,18 +25,20 @@ const scheduleData = [
           freq: [10, 10, 10, 10, 10],
         },
         {
-          id: 2,
+          id: 4,
           title: "Reverse pushup",
           freq: [20, 20],
         },
       ],
     },
   },
-  { day: "Monday" },
+  {
+    day: "Monday",
+  },
   {
     day: "Tuesday",
     workout: {
-      id: 1,
+      id: 2,
       title: "Pullup workout",
       exercises: [
         {
@@ -55,20 +57,26 @@ const scheduleData = [
           freq: [10, 10, 10, 10, 10],
         },
         {
-          id: 2,
+          id: 4,
           title: "Chine up",
           freq: [20, 20],
         },
       ],
     },
   },
-  { day: "Windesday" },
-  { day: "Thuresday" },
-  { day: "Friday" },
-  { day: "Saturday" },
+  {
+    day: "Windesday",
+  },
+  {
+    day: "Thuresday",
+  },
+  {
+    day: "Friday",
+  },
+  {
+    day: "Saturday",
+  },
 ];
-
-const arr = [1, 2, 3];
 
 const GLOBAL_STORAGE_KEY = "PRO_SCHEDULE";
 
@@ -82,6 +90,10 @@ const Schedule = () => {
   const [workoutTitle, setSetWorkoutTitle] = useState(today.workout?.title);
   const [titleUpdate, setTitleUpdate] = useState("");
   const [editing, setEditing] = useState(false);
+
+  useEffect(() => {
+    handleWhichDay();
+  }, []);
 
   const handleGlobalSave = () => {
     // Get previous image of the schedule
@@ -100,23 +112,23 @@ const Schedule = () => {
   };
 
   const handleSetToday = (ScheduleObj) => {
-    setToday((prev) => {
-      return { ...prev, ScheduleObj };
-    });
-    handleGlobalSave();
+    console.log("nothing to save");
+    // setToday((prev) => {
+    //   return { ...prev, ScheduleObj };
+    // });
+    // handleGlobalSave();
   };
 
-  useEffect(() => {
-    handleWhichDay();
-  }, []);
-
   const handleWhichDay = () => {
+    // Get Today name
     var date = new Date();
     date.setDate(date.getDate() - 1); // add day
     const todayName = date.toLocaleDateString("en-us", { weekday: "long" }); // get day name
 
     // Get scheduleData from localStorage
     let scheduleData = getScheduleData(GLOBAL_STORAGE_KEY);
+
+    console.log("HI", scheduleData);
 
     let todayObj = {};
     // // very efficant way to pick day instead of array fuck
@@ -150,12 +162,6 @@ const Schedule = () => {
       handleSetToday(workoutObj);
     }
   };
-
-  // const setTodayUpdat = (title) => {
-  //     setSetWorkoutTitle(title);
-  //     setToday((today.workout.title = workoutTitle));
-  //   }
-  // };
 
   return (
     <div>
