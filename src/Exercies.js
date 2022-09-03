@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import Customset from "./CustomSET";
 import "./App.css";
+import exercises from "./database/exercises";
+import { SetController } from "./SetController";
 
 const Exercise = ({ exercise, handleSetToday }) => {
   const [editing, setEditing] = useState(false);
@@ -26,10 +28,23 @@ const Exercise = ({ exercise, handleSetToday }) => {
       handleSetToday(exercise);
     }
   };
+
+  const addFreq = (freq) => {
+    exercise.freq = freq;
+    handleSetToday(exercise);
+  };
+
+  const getExerciseName = (id) => {
+    let exername = exercises.filter((element) => {
+      return element.id === id;
+    });
+    return exername[0].title;
+  };
+
   return (
     <div>
       <div onDoubleClick={handleEditingStyle} style={viewMode}>
-        <li>{exercise.title}</li>
+        <li>{getExerciseName(exercise.id)}</li>
       </div>
       <input
         type="text"
@@ -39,12 +54,33 @@ const Exercise = ({ exercise, handleSetToday }) => {
         onKeyDown={handleEditingDone}
       />
 
-      <h5>{exercise.freq.length}- SETs</h5>
+      <div className="settitle">
+        <h5 onDoubleClick={handleEditingStyle}>{exercise.freq.length}- SETs</h5>
+        <div className="setController">
+          <SetController addFreq={addFreq} />
+        </div>
+      </div>
+
       <ul>
-        <Customset key={exercise.id} set={exercise.freq} />
+        {exercise.freq.map((set, index) => (
+          <Customset
+            key={index}
+            set={set}
+            index={index}
+            freq={exercise.freq}
+            addFreq={addFreq}
+          />
+        ))}
       </ul>
     </div>
   );
 };
 
 export default Exercise;
+{
+  /* <Customset
+          set={exercise.freq}
+          handleSetToday={handleSetToday}
+          key={exercise.id}
+        /> */
+}

@@ -62,3 +62,37 @@
   background-color: aliceblue;
   margin-bottom: 10px;
 }
+
+.container {
+  display: flex;
+  flex-direction: row;
+}
+
+.insert {
+  margin-left: 50px;
+}
+
+.exerlist {
+  display: flex;
+  flex-direction: row;
+}
+
+.settitle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.setcontroller {
+  display: flex;
+  flex-direction: row;
+}
+
+.setController {
+  margin-left: 20px;
+}
+
+.numberInput {
+  width: 30px;
+  margin-right: 20px;
+}

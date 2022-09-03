@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { v4 as uuidv4 } from "uuid";
 
 import Exercies from "./Exercies";
+
+import scheduleData from "./database/ScheduleObject";
+import exercises from "./database/exercises";
 
 const GLOBAL_STORAGE_KEY = "PRO_SCHEDULE";
 
@@ -16,18 +20,22 @@ const Schedule = () => {
   const [today, setToday] = useState({});
   const [titleUpdate, setTitleUpdate] = useState("");
   const [editing, setEditing] = useState(false);
-
-  useEffect(() => {
-    // localStorage.setItem(GLOBAL_STORAGE_KEY, JSON.stringify(scheduleData));
-
-    handleWhichDay();
-  }, []);
+  const [newWorkout, setNewWorkout] = useState("");
 
   const handleGlobalScheduleSave = (todayObj) => {
-    setGlobalSchedule((prev) => {
-      return { ...prev, todayObj };
+    setGlobalSchedule((prevStat) => {
+      return prevStat.map((aDay) => {
+        if (aDay == today.day) {
+          return {
+            ...aDay,
+            today,
+          };
+        }
+        return aDay;
+      });
     });
-    console.log("Global Schedule after update a day: ", globalSchedule);
+
+    // console.log("Global Schedule after update a day: ", globalSchedule);
 
     // Global schedule to the local stoarge.
     localStorage.setItem(GLOBAL_STORAGE_KEY, JSON.stringify(globalSchedule));
@@ -42,10 +50,46 @@ const Schedule = () => {
     handleGlobalScheduleSave(today);
   };
 
+  const handleAddnewWorkout = (event) => {
+    if (event.key === "Enter") {
+      const workoutObj = {
+        workout: {
+          id: uuidv4(),
+          title: newWorkout,
+          exercises: [],
+        },
+      };
+      let updatedDay = Object.assign(today, workoutObj);
+      console.log(updatedDay);
+      handleSetToday(updatedDay);
+    }
+  };
+
+  const assignExercise = (id, workoutObj) => {
+    const exerciseObj = {
+      id: id,
+      freq: [],
+    };
+
+    workoutObj.exercises?.push(exerciseObj);
+    handleSetToday(workoutObj);
+    console.log("todayObj after adding exercise: ", workoutObj);
+  };
+
+  const handleEditingDone = (event) => {
+    if (event.key === "Enter") {
+      setEditing(false);
+      const workoutObj = today.workout;
+      workoutObj.title = titleUpdate;
+      console.log("workout object after edit: ", workoutObj);
+      handleSetToday(workoutObj);
+    }
+  };
+
   const handleWhichDay = () => {
     // Get Today name
     var date = new Date();
-    date.setDate(date.getDate() - 4); // add day
+    date.setDate(date.getDate() - 0); // add day
     const todayName = date.toLocaleDateString("en-us", { weekday: "long" }); // get day name
 
     // Get scheduleData from localStorage
@@ -83,45 +127,71 @@ const Schedule = () => {
     editMode.display = "none";
   }
 
-  const handleEditingDone = (event) => {
-    if (event.key === "Enter") {
-      setEditing(false);
-      const workoutObj = today.workout;
-      workoutObj.title = titleUpdate;
-      console.log("workout object after edit: ", workoutObj);
-      handleSetToday(workoutObj);
-    }
-  };
+  useEffect(() => {
+    handleWhichDay();
+    // localStorage.setItem(GLOBAL_STORAGE_KEY, JSON.stringify(scheduleData)); // rest the storage value
+  }, [globalSchedule]);
 
   return (
-    <div>
-      <h1>{today?.day}</h1>
-      {/* <button
-        onClick={() => {
-          console.log(globalSchedule);
-        }}
-      >
-        Save Edit
-      </button> */}
-      <div onDoubleClick={handleEditingStyle} style={viewMode}>
-        <h3>{today.workout?.title}</h3>
+    <div className="container">
+      <div>
+        <h1>{today?.day}</h1>
+        <button
+          onClick={() => {
+            console.log(globalSchedule);
+          }}
+        >
+          Save Edit
+        </button>
+        <div onDoubleClick={handleEditingStyle} style={viewMode}>
+          <h3>{today.workout?.title}</h3>
+        </div>
+        <input
+          type="text"
+          style={editMode}
+          defaultValue={today.workout?.title}
+          onChange={(e) => setTitleUpdate(e.target.value)}
+          onKeyDown={handleEditingDone}
+        />
+        <ul>
+          {today.workout?.exercises.map((exercise) => (
+            <Exercies
+              key={exercise.id}
+              exercise={exercise}
+              handleSetToday={handleSetToday}
+            />
+          ))}
+        </ul>
       </div>
-      <input
-        type="text"
-        style={editMode}
-        defaultValue={today.workout?.title}
-        onChange={(e) => setTitleUpdate(e.target.value)}
-        onKeyDown={handleEditingDone}
-      />
-      <ul>
-        {today.workout?.exercises.map((exercise) => (
-          <Exercies
-            key={exercise.id}
-            exercise={exercise}
-            handleSetToday={handleSetToday}
-          />
-        ))}
-      </ul>
+      <div className="insert">
+        <label>Add new workout</label>
+        <input
+          type="text"
+          placeholder="Enter new workout"
+          onChange={(e) => setNewWorkout(e.target.value)}
+          onKeyDown={handleAddnewWorkout}
+          defaultValue={newWorkout}
+        />
+        <ul>
+          {exercises.map((exer) => {
+            return (
+              <div key={exer.id} className="exerlist">
+                <li>
+                  {exer.id}
+                  {exer.title}
+                </li>
+                <button
+                  onClick={() => {
+                    assignExercise(exer.id, today.workout);
+                  }}
+                >
+                  add
+                </button>
+              </div>
+            );
+          })}
+        </ul>
+      </div>
     </div>
   );
 };
