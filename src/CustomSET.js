@@ -23,6 +23,7 @@ const Customset = ({ index, set, freq, addFreq }) => {
     if (event.key == "Enter") {
       setEditing(false);
 
+      /* HOW TO UPDATE CUSTOM FREQUANCY */
       // search for the item in freq array by the index
       // Update the value with setUpdate prop
       // Call addFreq to make general update on the workout.

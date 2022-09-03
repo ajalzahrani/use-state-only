@@ -24,16 +24,20 @@ const Exercise = ({ exercise, handleSetToday }) => {
   const handleEditingDone = (event) => {
     if (event.key === "Enter") {
       setEditing(false);
+
+      /* HOW TO UPDATE EXERCISE TITLE */
       exercise.title = exerciseUpdate;
       handleSetToday(exercise);
     }
   };
 
+  /* HOW TO ADD FREQUANCY TO AN EXERCISE */
   const addFreq = (freq) => {
     exercise.freq = freq;
     handleSetToday(exercise);
   };
 
+  /* HOW TO QUERY EXERCISE NAME BY ID FROM EXERCISE LIST */
   const getExerciseName = (id) => {
     let exername = exercises.filter((element) => {
       return element.id === id;

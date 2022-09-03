@@ -41,6 +41,7 @@ const Schedule = () => {
     localStorage.setItem(GLOBAL_STORAGE_KEY, JSON.stringify(globalSchedule));
   };
 
+  /* HOW TO UPDATE CURRENT DAY WORKOUT PARAMETERS (MAIN METHOD) */
   const handleSetToday = (ScheduleObj) => {
     // console.log("nothing to save");
     setToday((prev) => {
@@ -50,6 +51,7 @@ const Schedule = () => {
     handleGlobalScheduleSave(today);
   };
 
+  /* HOW TO ADD NEW WORKOUT */
   const handleAddnewWorkout = (event) => {
     if (event.key === "Enter") {
       const workoutObj = {
@@ -65,6 +67,7 @@ const Schedule = () => {
     }
   };
 
+  /* HOW TO ASSIGN EXERCISES TO WORKOUT */
   const assignExercise = (id, workoutObj) => {
     const exerciseObj = {
       id: id,
@@ -79,6 +82,8 @@ const Schedule = () => {
   const handleEditingDone = (event) => {
     if (event.key === "Enter") {
       setEditing(false);
+
+      /* HOW TO EDIT WORKOUT TITLE */
       const workoutObj = today.workout;
       workoutObj.title = titleUpdate;
       console.log("workout object after edit: ", workoutObj);
@@ -86,6 +91,7 @@ const Schedule = () => {
     }
   };
 
+  /* HOW TO SELECT CURRENT DAY OBJECT FROM STORAGE */
   const handleWhichDay = () => {
     // Get Today name
     var date = new Date();
@@ -144,6 +150,7 @@ const Schedule = () => {
           Save Edit
         </button>
         <div onDoubleClick={handleEditingStyle} style={viewMode}>
+          {/* HOW TO GET WORKOUT TITLE FROM WORKOUT OBJECT */}
           <h3>{today.workout?.title}</h3>
         </div>
         <input
@@ -154,6 +161,7 @@ const Schedule = () => {
           onKeyDown={handleEditingDone}
         />
         <ul>
+          {/* HOW TO RENDER PARTICUAL WORKOUT EXERCISES */}
           {today.workout?.exercises.map((exercise) => (
             <Exercies
               key={exercise.id}
@@ -173,6 +181,7 @@ const Schedule = () => {
           defaultValue={newWorkout}
         />
         <ul>
+          {/* HOW TO RENDER A LIST OF EXERCISES */}
           {exercises.map((exer) => {
             return (
               <div key={exer.id} className="exerlist">

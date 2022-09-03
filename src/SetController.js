@@ -13,6 +13,7 @@ export const SetController = ({ addFreq }) => {
     setReps(e.target.value);
   };
 
+  /* HOW TO ADD FREQUANCY TO AN EXERCISE */
   function save() {
     let arry = [];
     for (let i = 0; i < sets; i++) {
