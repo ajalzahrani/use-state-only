@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { v4 as uuidv4 } from "uuid";
+import { useImmer } from "use-immer";
+import { produce } from "immer";
+import { useStore } from "./store";
 
 import Exercies from "./Exercies";
 
@@ -18,65 +21,69 @@ const Schedule = () => {
     getScheduleData(GLOBAL_STORAGE_KEY)
   );
   const [today, setToday] = useState({});
+  // const [today, setToday] = useImmer({});
   const [titleUpdate, setTitleUpdate] = useState("");
   const [editing, setEditing] = useState(false);
   const [newWorkout, setNewWorkout] = useState("");
 
-  const handleGlobalScheduleSave = (todayObj) => {
-    setGlobalSchedule((prevStat) => {
-      return prevStat.map((aDay) => {
-        if (aDay == today.day) {
-          return {
-            ...aDay,
-            today,
-          };
-        }
-        return aDay;
-      });
-    });
+  const todays = useStore((state) => state.today);
+  const addNewWorkout = useStore((state) => state.addNewWorkout);
+  const deleteWorkout = useStore((state) => state.deleteWorkout);
 
-    // console.log("Global Schedule after update a day: ", globalSchedule);
+  const handleGlobalScheduleSave = () => {
+    console.log("hi", today);
+    setGlobalSchedule(
+      produce(globalSchedule, (draft) => {
+        const index = draft.findIndex((day) => day.day === today.day);
+        if (index !== -1) draft[index] = today;
+      })
+    );
 
     // Global schedule to the local stoarge.
     localStorage.setItem(GLOBAL_STORAGE_KEY, JSON.stringify(globalSchedule));
   };
 
-  /* HOW TO UPDATE CURRENT DAY WORKOUT PARAMETERS (MAIN METHOD) */
-  const handleSetToday = (ScheduleObj) => {
-    // console.log("nothing to save");
-    setToday((prev) => {
-      return { ...prev, ScheduleObj };
-    });
-    console.log("todayObj after update workout: ", today);
-    handleGlobalScheduleSave(today);
+  /* HOW TO UPATE CURRENT DAY WORKOUT PARAMETERS USING PRODECE */
+  const handleSetToday = (workout) => {
+    setToday(
+      produce(today, (draft) => {
+        draft["workout"] = workout;
+      })
+    );
+
+    handleGlobalScheduleSave();
   };
 
   /* HOW TO ADD NEW WORKOUT */
   const handleAddnewWorkout = (event) => {
     if (event.key === "Enter") {
-      const workoutObj = {
-        workout: {
-          id: uuidv4(),
-          title: newWorkout,
-          exercises: [],
-        },
-      };
-      let updatedDay = Object.assign(today, workoutObj);
-      console.log(updatedDay);
-      handleSetToday(updatedDay);
+      // const workout = {
+      //   id: uuidv4(),
+      //   title: newWorkout,
+      //   exercises: [],
+      // };
+      // handleSetToday(workout)
+      addNewWorkout({
+        id: uuidv4(),
+        title: newWorkout,
+        exercises: [],
+      });
+      console.log("handleAddWorkout: ", todays);
     }
   };
 
   /* HOW TO ASSIGN EXERCISES TO WORKOUT */
-  const assignExercise = (id, workoutObj) => {
+  const assignExercise = (id) => {
     const exerciseObj = {
       id: id,
       freq: [],
     };
 
-    workoutObj.exercises?.push(exerciseObj);
-    handleSetToday(workoutObj);
-    console.log("todayObj after adding exercise: ", workoutObj);
+    setToday(
+      produce((draft) => {
+        draft.workout.exercises.push(exerciseObj);
+      })
+    );
   };
 
   const handleEditingDone = (event) => {
@@ -84,41 +91,17 @@ const Schedule = () => {
       setEditing(false);
 
       /* HOW TO EDIT WORKOUT TITLE */
-      const workoutObj = today.workout;
-      workoutObj.title = titleUpdate;
-      console.log("workout object after edit: ", workoutObj);
-      handleSetToday(workoutObj);
+      setToday(
+        produce((draft) => {
+          draft.workout.title = titleUpdate;
+        })
+      );
     }
   };
 
-  /* HOW TO SELECT CURRENT DAY OBJECT FROM STORAGE */
-  const handleWhichDay = () => {
-    // Get Today name
-    var date = new Date();
-    date.setDate(date.getDate() - 0); // add day
-    const todayName = date.toLocaleDateString("en-us", { weekday: "long" }); // get day name
-
-    // Get scheduleData from localStorage
-    // let scheduleData = getScheduleData(GLOBAL_STORAGE_KEY);
-
-    // console.log("HI old", scheduleData);
-    // console.log("HI new", globalSchedule);
-
-    let todayObj = {};
-    // // very efficant way to pick day instead of array fuck
-    // for (let i = 0; i < scheduleData.length; i++) {
-    //   if (scheduleData[i].day === todayName) {
-    //     todayObj = scheduleData[i];
-    //   }
-    // }
-    for (let i = 0; i < globalSchedule.length; i++) {
-      if (globalSchedule[i].day === todayName) {
-        todayObj = globalSchedule[i];
-      }
-    }
-
-    setToday(todayObj);
-  };
+  const handleDeleteWorkout = useCallback(() => {
+    deleteWorkout();
+  });
 
   const handleEditingStyle = () => {
     setEditing(true);
@@ -133,9 +116,26 @@ const Schedule = () => {
     editMode.display = "none";
   }
 
+  /* HOW TO SELECT CURRENT DAY OBJECT FROM STORAGE */
+  const handleWhichDay = () => {
+    // Get Today name
+    var date = new Date();
+    date.setDate(date.getDate() + 1); // add day
+    const todayName = date.toLocaleDateString("en-us", { weekday: "long" }); // get day name
+
+    let todayObj = {};
+    // very efficant way to pick day instead of array fuck
+    for (let i = 0; i < globalSchedule.length; i++) {
+      if (globalSchedule[i].day === todayName) {
+        todayObj = globalSchedule[i];
+        break;
+      }
+    }
+    setToday(todayObj);
+  };
+
   useEffect(() => {
     handleWhichDay();
-    // localStorage.setItem(GLOBAL_STORAGE_KEY, JSON.stringify(scheduleData)); // rest the storage value
   }, [globalSchedule]);
 
   return (
@@ -144,25 +144,26 @@ const Schedule = () => {
         <h1>{today?.day}</h1>
         <button
           onClick={() => {
-            console.log(globalSchedule);
+            console.log(todays);
           }}
         >
           Save Edit
         </button>
         <div onDoubleClick={handleEditingStyle} style={viewMode}>
           {/* HOW TO GET WORKOUT TITLE FROM WORKOUT OBJECT */}
-          <h3>{today.workout?.title}</h3>
+          <h3>{today?.workout?.title}</h3>
         </div>
         <input
           type="text"
           style={editMode}
-          defaultValue={today.workout?.title}
+          defaultValue={today?.workout?.title}
           onChange={(e) => setTitleUpdate(e.target.value)}
           onKeyDown={handleEditingDone}
         />
         <ul>
           {/* HOW TO RENDER PARTICUAL WORKOUT EXERCISES */}
-          {today.workout?.exercises.map((exercise) => (
+
+          {today?.workout?.exercises.map((exercise) => (
             <Exercies
               key={exercise.id}
               exercise={exercise}
@@ -180,6 +181,7 @@ const Schedule = () => {
           onKeyDown={handleAddnewWorkout}
           defaultValue={newWorkout}
         />
+        <button onClick={handleDeleteWorkout}>Delete workout</button>
         <ul>
           {/* HOW TO RENDER A LIST OF EXERCISES */}
           {exercises.map((exer) => {
@@ -191,7 +193,7 @@ const Schedule = () => {
                 </li>
                 <button
                   onClick={() => {
-                    assignExercise(exer.id, today.workout);
+                    assignExercise(exer.id);
                   }}
                 >
                   add
