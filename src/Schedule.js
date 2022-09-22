@@ -74,6 +74,7 @@ const Schedule = () => {
         <button
           onClick={() => {
             saveGlobalStore();
+            alert("Workout saved successfully");
           }}
         >
           Save Edit

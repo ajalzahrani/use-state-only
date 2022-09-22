@@ -3,7 +3,10 @@ import { persist } from "zustand/middleware";
 import { produce } from "immer";
 const GLOBAL_STORAGE_KEY = "PRO_Schedule";
 
-let store = (set) => ({
+const globalSchedule =
+  JSON.parse(localStorage.getItem(GLOBAL_STORAGE_KEY)) || [];
+
+let store = (set, get) => ({
   today: {},
   addNewWorkout: (workoutObj) =>
     set(
@@ -80,43 +83,27 @@ let store = (set) => ({
       })
     ),
   saveGlobalStore: () => {
-    console.log(globalSchedule);
+    handleGlobalScheduleSave(get().today);
   },
 });
 
-store = persist(store, { name: GLOBAL_STORAGE_KEY });
-
 export const useStore = create(store);
 
-export const useLocalStorage = create(
-  persist(
-    (set, get) => ({
-      anwers: [],
-      addAnAnswer: (answer) =>
-        set((prevState) => ({ answers: [...prevState.answers, answer] })),
-    }),
-    {
-      name: "answer-storage", // unique name
-      getStorage: () => sessionStorage, // (optional) by default the 'localStorage' is used
+const handleGlobalScheduleSave = (today) => {
+  for (let i = 0; i < globalSchedule.length; i++) {
+    if (globalSchedule[i].day === today.day) {
+      globalSchedule[i] = today;
     }
-  )
-);
-
-// function getScheduleData(key) {
-//   const temp = JSON.parse(localStorage.getItem(key));
-//   return temp || [];
-// }
-
-// const globalSchedule = getScheduleData(GLOBAL_STORAGE_KEY);
-
-const globalSchedule =
-  JSON.parse(localStorage.getItem(GLOBAL_STORAGE_KEY)) || [];
+  }
+  // Global schedule to the local stoarge.
+  localStorage.setItem(GLOBAL_STORAGE_KEY, JSON.stringify(globalSchedule));
+};
 
 /* HOW TO SELECT CURRENT DAY OBJECT FROM STORAGE */
 const handleWhichDay = () => {
   // Get Today name
   var date = new Date();
-  date.setDate(date.getDate() + 0); // add day
+  date.setDate(date.getDate() + 1); // add day
   const todayName = date.toLocaleDateString("en-us", { weekday: "long" }); // get day name
 
   let todayObj = {};
@@ -128,11 +115,6 @@ const handleWhichDay = () => {
     }
   }
   return todayObj;
-};
-
-const handleGlobalScheduleSave = () => {
-  // Global schedule to the local stoarge.
-  localStorage.setItem(GLOBAL_STORAGE_KEY, JSON.stringify(globalSchedule));
 };
 
 useStore.setState(() => ({ today: handleWhichDay() }));

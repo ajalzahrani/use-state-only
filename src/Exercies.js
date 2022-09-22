@@ -6,8 +6,6 @@ import { SetController } from "./SetController";
 import { useStore } from "./store";
 
 const Exercise = ({ exercise }) => {
-  const [editing, setEditing] = useState(false);
-
   const exerciseAddFreq = useStore((state) => state.exerciseAddFreq);
 
   /* HOW TO ADD FREQUANCY TO AN EXERCISE */
