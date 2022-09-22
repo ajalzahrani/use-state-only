@@ -103,7 +103,7 @@ const handleGlobalScheduleSave = (today) => {
 const handleWhichDay = () => {
   // Get Today name
   var date = new Date();
-  date.setDate(date.getDate() + 1); // add day
+  date.setDate(date.getDate() + 0); // add day
   const todayName = date.toLocaleDateString("en-us", { weekday: "long" }); // get day name
 
   let todayObj = {};
