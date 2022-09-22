@@ -1,9 +1,12 @@
-import { useEffect, useState, Button } from "react";
+import { useState } from "react";
 import React from "react";
+import { useStore } from "./store";
 
-const Customset = ({ index, set, freq, addFreq }) => {
+const Customset = ({ index, set, exerId }) => {
   const [editing, setEditing] = useState(false);
   const [setUpdate, setSETUpdate] = useState(set);
+
+  const exerciseUpdateFreq = useStore((state) => state.exerciseUpdateFreq);
 
   const handleEditingStyle = () => {
     setEditing(true);
@@ -22,14 +25,7 @@ const Customset = ({ index, set, freq, addFreq }) => {
     console.log("handleEditDone Called");
     if (event.key == "Enter") {
       setEditing(false);
-
-      /* HOW TO UPDATE CUSTOM FREQUANCY */
-      // search for the item in freq array by the index
-      // Update the value with setUpdate prop
-      // Call addFreq to make general update on the workout.
-      let updatedFreq = freq;
-      updatedFreq[index] = setUpdate;
-      addFreq(updatedFreq);
+      exerciseUpdateFreq(exerId, index, setUpdate);
     }
   };
 

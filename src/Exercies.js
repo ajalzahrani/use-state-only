@@ -3,38 +3,16 @@ import Customset from "./CustomSET";
 import "./App.css";
 import exercises from "./database/exercises";
 import { SetController } from "./SetController";
+import { useStore } from "./store";
 
-const Exercise = ({ exercise, handleSetToday }) => {
+const Exercise = ({ exercise }) => {
   const [editing, setEditing] = useState(false);
-  const [exerciseUpdate, setExerciseUpdate] = useState();
 
-  const handleEditingStyle = () => {
-    setEditing(true);
-  };
-
-  let editMode = {};
-  let viewMode = {};
-
-  if (editing) {
-    viewMode.display = "none";
-  } else {
-    editMode.display = "none";
-  }
-
-  const handleEditingDone = (event) => {
-    if (event.key === "Enter") {
-      setEditing(false);
-
-      /* HOW TO UPDATE EXERCISE TITLE */
-      exercise.title = exerciseUpdate;
-      handleSetToday(exercise);
-    }
-  };
+  const exerciseAddFreq = useStore((state) => state.exerciseAddFreq);
 
   /* HOW TO ADD FREQUANCY TO AN EXERCISE */
   const addFreq = (freq) => {
-    exercise.freq = freq;
-    handleSetToday(exercise);
+    exerciseAddFreq(exercise.id, freq);
   };
 
   /* HOW TO QUERY EXERCISE NAME BY ID FROM EXERCISE LIST */
@@ -47,19 +25,10 @@ const Exercise = ({ exercise, handleSetToday }) => {
 
   return (
     <div>
-      <div onDoubleClick={handleEditingStyle} style={viewMode}>
-        <li>{getExerciseName(exercise.id)}</li>
-      </div>
-      <input
-        type="text"
-        style={editMode}
-        defaultValue={exercise.title}
-        onChange={(e) => setExerciseUpdate(e.target.value)}
-        onKeyDown={handleEditingDone}
-      />
+      <li>{getExerciseName(exercise.id)}</li>
 
       <div className="settitle">
-        <h5 onDoubleClick={handleEditingStyle}>{exercise.freq.length}- SETs</h5>
+        <h5>{exercise.freq.length}- SETs</h5>
         <div className="setController">
           <SetController addFreq={addFreq} />
         </div>
@@ -67,13 +36,7 @@ const Exercise = ({ exercise, handleSetToday }) => {
 
       <ul>
         {exercise.freq.map((set, index) => (
-          <Customset
-            key={index}
-            set={set}
-            index={index}
-            freq={exercise.freq}
-            addFreq={addFreq}
-          />
+          <Customset key={index} set={set} exerId={exercise.id} index={index} />
         ))}
       </ul>
     </div>

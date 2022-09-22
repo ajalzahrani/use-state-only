@@ -22,22 +22,11 @@ export const SetController = ({ addFreq }) => {
     addFreq(arry);
   }
 
-  const handleChangeChk = () => {};
-
-  //   useEffect(() => {
-  //     save();
-  //   }, [sets, reps]);
-
   return (
     <div>
       <div className="setcontroller">
         <input className="numberInput" onChange={handleOnChangeSet} />
         Sets
-        <input
-          type="checkbox"
-          defaultChecked={chkbox}
-          onChange={handleChangeChk}
-        />
       </div>
       <div className="setcontroller">
         <input className="numberInput" onChange={handleOnChangeRep} />

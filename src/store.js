@@ -1,40 +1,116 @@
 import create from "zustand";
+import { persist } from "zustand/middleware";
 import { produce } from "immer";
-const GLOBAL_STORAGE_KEY = "PRO_SCHEDULE";
+const GLOBAL_STORAGE_KEY = "PRO_Schedule";
 
-function getScheduleData(key) {
-  const temp = JSON.parse(localStorage.getItem(key));
-  return temp || [];
-}
-
-const globalSchedule = getScheduleData(GLOBAL_STORAGE_KEY);
-
-export const useStore = create((set) => ({
+let store = (set) => ({
   today: {},
-  workoutName: "",
-  exercises: [],
   addNewWorkout: (workoutObj) =>
     set(
       produce((draft) => {
         draft.today.workout = workoutObj;
       })
     ),
-  addDrama: (payload) =>
+
+  updateWorkout: (workoutName) =>
     set(
       produce((draft) => {
-        draft.kdramas.push({
-          id: Math.floor(Math.random() * 100),
-          name: payload,
-        });
+        draft.today.workout.title = workoutName;
       })
     ),
   deleteWorkout: () =>
     set(
       produce((draft) => {
-        delete draft["workout"];
+        delete draft.today["workout"];
       })
     ),
-}));
+  addExercise: (exerciseObj) =>
+    set(
+      produce((draft) => {
+        let exercises = draft.today.workout.exercises;
+
+        let isFound = false;
+        for (let i = 0; i < exercises.length; i++) {
+          if (exercises[i].id === exerciseObj.id) {
+            isFound = true;
+          }
+        }
+
+        if (!isFound) {
+          exercises.push(exerciseObj);
+        }
+
+        draft.today.workout.exercises = exercises;
+      })
+    ),
+  updateExercise: (exerId, exerciseObj) =>
+    set(
+      produce((draft) => {
+        const index = draft.today.workout.exercises.findIndex(
+          (exercise) => exercise.id === exerId
+        );
+
+        if (index !== -1) {
+          draft.today.workout.exercises[index] = exerciseObj;
+        }
+      })
+    ),
+  exerciseAddFreq: (exerId, freq) =>
+    set(
+      produce((draft) => {
+        const index = draft.today.workout.exercises.findIndex(
+          (exercise) => exercise.id === exerId
+        );
+
+        if (index !== -1) {
+          draft.today.workout.exercises[index].freq = freq;
+        }
+      })
+    ),
+  exerciseUpdateFreq: (exerId, freqIndex, updateValue) =>
+    set(
+      produce((draft) => {
+        const exerciseIndex = draft.today.workout.exercises.findIndex(
+          (exercise) => exercise.id === exerId
+        );
+        if (exerciseIndex !== -1) {
+          draft.today.workout.exercises[exerciseIndex].freq[freqIndex] =
+            updateValue;
+        }
+      })
+    ),
+  saveGlobalStore: () => {
+    console.log(globalSchedule);
+  },
+});
+
+store = persist(store, { name: GLOBAL_STORAGE_KEY });
+
+export const useStore = create(store);
+
+export const useLocalStorage = create(
+  persist(
+    (set, get) => ({
+      anwers: [],
+      addAnAnswer: (answer) =>
+        set((prevState) => ({ answers: [...prevState.answers, answer] })),
+    }),
+    {
+      name: "answer-storage", // unique name
+      getStorage: () => sessionStorage, // (optional) by default the 'localStorage' is used
+    }
+  )
+);
+
+// function getScheduleData(key) {
+//   const temp = JSON.parse(localStorage.getItem(key));
+//   return temp || [];
+// }
+
+// const globalSchedule = getScheduleData(GLOBAL_STORAGE_KEY);
+
+const globalSchedule =
+  JSON.parse(localStorage.getItem(GLOBAL_STORAGE_KEY)) || [];
 
 /* HOW TO SELECT CURRENT DAY OBJECT FROM STORAGE */
 const handleWhichDay = () => {
@@ -52,6 +128,11 @@ const handleWhichDay = () => {
     }
   }
   return todayObj;
+};
+
+const handleGlobalScheduleSave = () => {
+  // Global schedule to the local stoarge.
+  localStorage.setItem(GLOBAL_STORAGE_KEY, JSON.stringify(globalSchedule));
 };
 
 useStore.setState(() => ({ today: handleWhichDay() }));
