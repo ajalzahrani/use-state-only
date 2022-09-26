@@ -1,4 +1,6 @@
 .App {
+  display: flex;
+  flex-direction: row;
   text-align: left;
   padding: 30px;
 }
@@ -95,4 +97,35 @@
 .numberInput {
   width: 30px;
   margin-right: 20px;
+}
+
+.sessionContainer {
+  display: flex;
+  flex: 1;
+  margin-left: 10px;
+  border-left: solid;
+  padding-left: 10px;
+  /* background-color: #282c34; */
+  justify-content: center;
+}
+
+.sessionInnerContainer {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  /* justify-content: center; */
+  /* text-align: center; */
+}
+
+.sessoinCardContainer {
+  border: solid;
+  padding: 10;
+  margin: 10px;
+  width: 500px;
+  height: 100px;
+}
+
+.cardTitle {
+  display: flex;
+  flex-direction: row;
 }

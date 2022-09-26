@@ -1,5 +1,6 @@
 import "./App.css";
 import Schedule from "./Schedule";
+import Session from "./Session";
 import ScheduleObject from "./database/ScheduleObject";
 
 function App() {
@@ -7,6 +8,7 @@ function App() {
   return (
     <div className="App">
       <Schedule />
+      <Session />
     </div>
   );
 }
